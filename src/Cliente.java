@@ -1,6 +1,7 @@
 
 import java.io.*;
 import java.net.*;
+import java.util.Random;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -28,12 +29,7 @@ public class Cliente {
             entradaDelServidor = new BufferedReader(new InputStreamReader(clientSocketTCP.getInputStream()));
         } catch (IOException ex) {
             System.err.println(ex);
-        }
-        try {
-            clientSocketUDP = new DatagramSocket();
-        } catch (SocketException ex) {
-            System.err.println(ex);
-        }
+        }        
         try {
             IPAddress = InetAddress.getByName("127.0.0.1");
         } catch (UnknownHostException ex) {
@@ -51,5 +47,13 @@ public class Cliente {
         echoSentence = entradaDelServidor.readLine();        
         return echoSentence;
     }
+    
+    public int crearSocketUDP() throws SocketException{
+        Random r = new Random();
+        int port = r.nextInt((25000 - 1025) + 1) + 1025;
+        clientSocketUDP = new DatagramSocket(port);
+        return port;
+    }
+    
     
 }

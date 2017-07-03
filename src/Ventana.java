@@ -23,7 +23,7 @@ public class Ventana implements ActionListener {
         marco = new JFrame();
         cliente = new Cliente();
         try {
-            img = ImageIO.read(new File("C:\\Users\\Nicoyarce\\Pictures\\yare yare.jpg"));
+            img = ImageIO.read(new File("C:/Users/Nicoyarce/Pictures/yare yare.jpg"));
         } catch (IOException ex) {
             System.err.println(ex);
         }
@@ -70,6 +70,7 @@ public class Ventana implements ActionListener {
             String respuesta = cliente.recibirTCP();
             texto.setText(respuesta);
             comprobarRespuesta(respuesta);
+            recibirVideo();
             cliente.clientSocketTCP.close();
         } catch (IOException ex) {
             System.err.println(ex);
@@ -83,8 +84,12 @@ public class Ventana implements ActionListener {
     private void comprobarRespuesta(String respuesta) throws IOException {
         int puerto = 0;
         if (respuesta.contains("OK")) {
-            puerto = cliente.clientSocketUDP.getPort();
+            puerto = cliente.crearSocketUDP();
             cliente.enviarTCP("PORT " + puerto);
         }
+    }
+
+    private void recibirVideo() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }
