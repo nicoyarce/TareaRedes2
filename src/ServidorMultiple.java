@@ -2,11 +2,10 @@
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
 public class ServidorMultiple extends Thread {
@@ -28,7 +27,8 @@ public class ServidorMultiple extends Thread {
         video1 = new ArrayList<File>();
         video2 = new ArrayList<File>();
         //Abrir ruta con video1
-        File f = new File("D:\\Video1"); ///////////Editar esto
+        File f = new File("C:\\Users\\Usuario\\Desktop\\Video1"); ///////////Editar esto
+        System.out.println("Video 1 tiene "+ (f.listFiles().length-1) +" fotos");
         video1.addAll(Arrays.asList(f.listFiles()));
         //f = new File("D:\\Video2");
         //video2.addAll(Arrays.asList(f.listFiles()));
@@ -111,9 +111,8 @@ public class ServidorMultiple extends Thread {
         }
         welcomeSocket.close();
     }
-
-    private int comprobarPeticion(String oracionCliente, PrintWriter writer) {
-        //esta funcion envia el comprueba el GET video y envia el OK con el tamaño
+    /*esta funcion comprueba el GET video y envia el OK con el tamaño*/
+    private int comprobarPeticion(String oracionCliente, PrintWriter writer) {        
         if (oracionCliente.contains("GET video")) {
             String nVideo = oracionCliente.substring(10); //corta el final del string
             switch (Integer.parseInt(nVideo)) {
@@ -130,12 +129,7 @@ public class ServidorMultiple extends Thread {
     }
 
     private byte[] transformarImagen(File foto) throws IOException {
-        BufferedImage img = ImageIO.read(foto); //recibe la foto
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ImageIO.write(img, "jpg", baos);
-        baos.flush();
-        byte[] buffer = baos.toByteArray(); //transforma el stream en un array de bytes
-        baos.close();
+        byte[] buffer = Files.readAllBytes(foto.toPath());
         return buffer;
     }
 }

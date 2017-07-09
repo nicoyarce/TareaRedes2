@@ -8,8 +8,6 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -28,11 +26,11 @@ public class Ventana extends JFrame implements ActionListener {
     public Ventana() {
         marco = new JFrame();
         cliente = new Cliente();
-        try {
-            img = ImageIO.read(new File("D:\\Video1\\Video1 0030.jpg"));
+        /*try {
+            img = ImageIO.read(new File("C:\\Users\\Usuario\\Desktop\\Video1\\Video1 0030.jpg"));
         } catch (IOException ex) {
             System.err.println(ex);
-        }
+        }*/
         panelNorte = new JPanel(new FlowLayout());
         panelSur = new JPanel(new FlowLayout());
         panelCentro = new JPanel() {
@@ -50,20 +48,20 @@ public class Ventana extends JFrame implements ActionListener {
         boton2 = new JButton();
         texto = new JLabel("Test");
         boton1.setText("Video 1");
-        boton2.setText("Video 2");
-        boton1.addActionListener(this);
-        boton2.addActionListener(this);
+        boton2.setText("Video 2");        
         marco.add(panelNorte, BorderLayout.NORTH);
         marco.add(panelCentro, BorderLayout.CENTER);
         marco.add(panelSur, BorderLayout.SOUTH);
         panelNorte.add(boton1);
         panelNorte.add(boton2);
         panelSur.add(texto);
+        boton1.addActionListener(this);
+        boton2.addActionListener(this);
     }
 
     private void configurarVentana() {
         marco.setTitle("Cliente");
-        marco.setSize(1366, 768);
+        marco.setSize(800, 600);
         marco.setLocationRelativeTo(null);
         marco.setLayout(new BorderLayout());
         marco.setResizable(false);
@@ -82,7 +80,8 @@ public class Ventana extends JFrame implements ActionListener {
             }
             String respuesta = cliente.recibirTCP();
             texto.setText(respuesta);
-            int nFramesTotal = cliente.comprobarRespuesta(respuesta);
+            //la funcion comprobarRespuesta crea el socket udp y se le envia el puerto al servidor
+            int nFramesTotal = cliente.comprobarRespuesta(respuesta); 
             int nFramesRecibidos = 0;
             respuesta = cliente.recibirTCP();
             while (!respuesta.equals("FIN")) {
