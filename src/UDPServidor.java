@@ -19,7 +19,7 @@ public class UDPServidor {
             String sentence = new String(receivePacket.getData());
 
             InetAddress IPAddress = receivePacket.getAddress();
-            int port = receivePacket.getPort();
+            int port = receivePacket.getPort();            
             String s = sentence.toUpperCase();
             sendData = s.getBytes();
             System.out.println("cliente:" + IPAddress + "  " + s);

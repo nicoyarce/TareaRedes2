@@ -2,8 +2,6 @@
 import java.io.*;
 import java.net.*;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class Cliente {
 
@@ -11,11 +9,11 @@ public class Cliente {
     BufferedReader entradaDelUsuario;
     Socket clientSocketTCP;
     DatagramSocket clientSocketUDP;
+    DatagramPacket paquete;
     PrintWriter alServidor;
     BufferedReader entradaDelServidor;
     InetAddress IPAddress;
-    byte[] sendData = new byte[1024];
-    byte[] receiveData = new byte[1024];
+    byte[] receiveData = new byte[2048];
 
     public Cliente() {
         //fijar entrada por teclado
@@ -34,8 +32,7 @@ public class Cliente {
             IPAddress = InetAddress.getByName("127.0.0.1");
         } catch (UnknownHostException ex) {
             System.err.println(ex);
-        }
-        
+        }        
     }
 
     public void enviarTCP(String texto) throws IOException {
@@ -55,5 +52,20 @@ public class Cliente {
         return port;
     }
     
+    public int comprobarRespuesta(String respuesta) throws IOException {
+        int puerto = 0;
+        if (respuesta.contains("OK")) {
+            puerto = crearSocketUDP();
+            enviarTCP("PORT " + puerto);
+            int nFrames = Integer.parseInt(respuesta.substring(3));
+            return nFrames;
+        }
+        return 0;
+    }
     
+    public DatagramPacket recibirVideo() throws IOException{
+        paquete = new DatagramPacket(receiveData, receiveData.length);
+        clientSocketUDP.receive(paquete);        
+        return paquete;
+    }    
 }

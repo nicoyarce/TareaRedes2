@@ -5,6 +5,8 @@ import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
 public class ServidorMultiple extends Thread {
@@ -28,6 +30,8 @@ public class ServidorMultiple extends Thread {
         //Abrir ruta con video1
         File f = new File("D:\\Video1"); ///////////Editar esto
         video1.addAll(Arrays.asList(f.listFiles()));
+        //f = new File("D:\\Video2");
+        //video2.addAll(Arrays.asList(f.listFiles()));
     }
 
     public void add(Socket connectionSocket) throws IOException {
@@ -55,7 +59,7 @@ public class ServidorMultiple extends Thread {
                         if (reader.ready()) // revisa si hay datos nuevos en el buffer de lectura del socket i-emo
                         {
                             oracionCliente = reader.readLine(); //recibe el GET video
-                            int video = comprobarPeticion(oracionCliente, writer);  //retorna el video elegido
+                            int video = comprobarPeticion(oracionCliente, writer);  //retorna el numero video elegido
                             System.out.println("Datos recibidos:" + oracionCliente + " desde " + clientes.get(i).getInetAddress().getHostAddress());
                             oracionCliente = reader.readLine(); //recibe el PORT mas el numero
                             System.out.println("Datos recibidos:" + oracionCliente + " desde " + clientes.get(i).getInetAddress().getHostAddress());
@@ -69,12 +73,14 @@ public class ServidorMultiple extends Thread {
                                     for (int j = 0; j < video1.size(); j++) {
                                         byte[] img = transformarImagen(video1.get(j));
                                         DatagramPacket packet = new DatagramPacket(img, img.length, IPCliente, puertoUDPCliente);
+                                        writer.println("NOFIN"); //se envia este mensaje para indicar al cliente que quedan imagenes
                                         serverSocket.send(packet);
                                     }
                                 case 2:
-                                    for (int j = 0; j < video1.size(); j++) {
+                                    for (int j = 0; j < video2.size(); j++) {
                                         byte[] img = transformarImagen(video2.get(j));
                                         DatagramPacket packet = new DatagramPacket(img, img.length, IPCliente, puertoUDPCliente);
+                                        writer.println("NOFIN"); //se envia este mensaje para indicar al cliente que quedan imagenes
                                         serverSocket.send(packet);
                                     }
                             }
@@ -83,7 +89,7 @@ public class ServidorMultiple extends Thread {
                         }
                     } catch (IOException e) {
                         // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        System.err.println(e);
                     }
                 } //if
             }//for
@@ -109,7 +115,7 @@ public class ServidorMultiple extends Thread {
     private int comprobarPeticion(String oracionCliente, PrintWriter writer) {
         //esta funcion envia el comprueba el GET video y envia el OK con el tamaño
         if (oracionCliente.contains("GET video")) {
-            String nVideo = oracionCliente.substring(10);
+            String nVideo = oracionCliente.substring(10); //corta el final del string
             switch (Integer.parseInt(nVideo)) {
                 case 1:
                     writer.println("OK " + video1.size());
@@ -124,11 +130,12 @@ public class ServidorMultiple extends Thread {
     }
 
     private byte[] transformarImagen(File foto) throws IOException {
-        BufferedImage img = ImageIO.read(foto);
+        BufferedImage img = ImageIO.read(foto); //recibe la foto
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         ImageIO.write(img, "jpg", baos);
         baos.flush();
-        byte[] buffer = baos.toByteArray();
+        byte[] buffer = baos.toByteArray(); //transforma el stream en un array de bytes
+        baos.close();
         return buffer;
     }
 }

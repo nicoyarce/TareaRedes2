@@ -21,7 +21,9 @@ public class UDPCliente {
         
         //se arma el paquete con los datos y el destino especificando ip y puerto
         DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, IPAddress, 9875);
+        
         clientSocket.send(sendPacket); //se envia el packete al socket declarado
+        
         ////////////////////////////////////////////////////////////////////////////////////
         
         DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length); 
