@@ -41,6 +41,7 @@ public class VentanaAuto extends javax.swing.JFrame {
         boton1 = new javax.swing.JButton();
         boton2 = new javax.swing.JButton();
         texto = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
         img = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
@@ -65,33 +66,59 @@ public class VentanaAuto extends javax.swing.JFrame {
 
         img.setText("img");
 
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(365, 365, 365)
+                .addComponent(img)
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(54, 54, 54)
+                .addComponent(img)
+                .addContainerGap(411, Short.MAX_VALUE))
+        );
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(boton1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(boton2))
-                    .addComponent(texto)
-                    .addComponent(img))
+                        .addContainerGap()
+                        .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(302, 302, 302)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(boton1, javax.swing.GroupLayout.PREFERRED_SIZE, 76, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.CENTER, layout.createSequentialGroup()
+                                        .addGap(93, 93, 93)
+                                        .addComponent(boton2))))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(383, 383, 383)
+                                .addComponent(texto)))
+                        .addGap(0, 317, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(boton1)
-                    .addComponent(boton2))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.CENTER)
+                    .addComponent(boton2)
+                    .addComponent(boton1))
+                .addGap(26, 26, 26)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(texto)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 225, Short.MAX_VALUE)
-                .addComponent(img)
-                .addGap(195, 195, 195))
+                .addContainerGap(27, Short.MAX_VALUE))
         );
 
         pack();
@@ -154,18 +181,18 @@ public class VentanaAuto extends javax.swing.JFrame {
     public void recibirVideo() throws IOException {
         String respuesta = cliente.recibirTCP();
         texto.setText(respuesta);
+        //la funcion comprobarRespuesta crea el socket udp y se le envia el puerto al servidor
         int nFramesTotal = cliente.comprobarRespuesta(respuesta);
         int nFramesRecibidos = 0;
         respuesta = cliente.recibirTCP();
         while (!respuesta.equals("FIN")) {
-            //esta linea transforma el arreglo de bytes a un icono
-            ImageIcon iicon = new ImageIcon(ImageIO.read(new ByteArrayInputStream(cliente.recibirVideo().getData())));
-            //luego el icono es fijado en un jlabel
-            img.setIcon(iicon);
-            img.repaint();            
-            nFramesRecibidos++;
+            //esta linea transforma el arreglo de bytes a un icono de un label
+            img.setIcon(new ImageIcon((cliente.recibirVideo().getData())));
+            img.removeAll();
+            img.repaint();
             System.out.println("Imagen " + nFramesRecibidos);
             respuesta = cliente.recibirTCP();
+            nFramesRecibidos++;
         }
         texto.setText("FIN. Recibio " + nFramesRecibidos + " frames de un total de " + nFramesTotal);
         //cliente.clientSocketTCP.close();
@@ -175,6 +202,7 @@ public class VentanaAuto extends javax.swing.JFrame {
     private javax.swing.JButton boton1;
     private javax.swing.JButton boton2;
     private javax.swing.JLabel img;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JLabel texto;
     // End of variables declaration//GEN-END:variables
 }

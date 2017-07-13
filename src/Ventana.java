@@ -1,66 +1,62 @@
 
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class Ventana extends JFrame implements ActionListener {
+public class Ventana implements ActionListener {
 
     private JFrame marco;
     private JPanel panelNorte, panelCentro, panelSur;
     private JButton boton1, boton2;
-    private JLabel texto;
+    private JLabel texto, labelImg;
+    private ArrayList<ImageIcon> buffer;
     private Cliente cliente;
-    private BufferedImage img;
+    private String respuesta;
+    int nFramesTotal, nFramesRecibidos = 0;
 
     public Ventana() {
-        marco = new JFrame();
+        //constructores
+        marco = new JFrame("Cliente");
         cliente = new Cliente();
-        /*try {
-            img = ImageIO.read(new File("C:\\Users\\Usuario\\Desktop\\Video1\\Video1 0030.jpg"));
-        } catch (IOException ex) {
-            System.err.println(ex);
-        }*/
         panelNorte = new JPanel(new FlowLayout());
         panelSur = new JPanel(new FlowLayout());
-        panelCentro = new JPanel() {
-            @Override
-            public void paint(Graphics g) {
-                super.paint(g);
-                g.drawImage(img, 100, 100, null);                
-                repaint();
-                removeAll();
-            }
-        };
+        panelCentro = new JPanel(new FlowLayout());
         configurarVentana();
         // creamos los componentes
-        boton1 = new JButton();
-        boton2 = new JButton();
-        texto = new JLabel("Test");
-        boton1.setText("Video 1");
-        boton2.setText("Video 2");        
+        boton1 = new JButton("Video 1");
+        boton2 = new JButton("Video 2");
+        texto = new JLabel("Presionar un boton");
+        labelImg = new JLabel();
+        buffer = new ArrayList();
+        respuesta = "";
+        //fijamos componentes
         marco.add(panelNorte, BorderLayout.NORTH);
         marco.add(panelCentro, BorderLayout.CENTER);
         marco.add(panelSur, BorderLayout.SOUTH);
         panelNorte.add(boton1);
         panelNorte.add(boton2);
         panelSur.add(texto);
+        panelCentro.add(labelImg);
         boton1.addActionListener(this);
         boton2.addActionListener(this);
+        try {
+            labelImg.setIcon(new ImageIcon(ImageIO.read(new File("D:\\Video1\\Video1 0030.jpg"))));
+        } catch (IOException ex) {
+            System.err.println(ex);
+        }
     }
 
     private void configurarVentana() {
-        marco.setTitle("Cliente");
         marco.setSize(800, 600);
         marco.setLocationRelativeTo(null);
         marco.setLayout(new BorderLayout());
@@ -78,25 +74,40 @@ public class Ventana extends JFrame implements ActionListener {
             if (e.getSource() == boton2) {
                 cliente.enviarTCP("GET video_2");
             }
-            String respuesta = cliente.recibirTCP();
-            texto.setText(respuesta);
-            //la funcion comprobarRespuesta crea el socket udp y se le envia el puerto al servidor
-            int nFramesTotal = cliente.comprobarRespuesta(respuesta); 
-            int nFramesRecibidos = 0;
-            respuesta = cliente.recibirTCP();
-            while (!respuesta.equals("FIN")) {
-                //esta linea transforma el arreglo de bytes a una imagen                
-                img = ImageIO.read(new ByteArrayInputStream(cliente.recibirVideo().getData()));
-                repaint();
-                removeAll();                
-                nFramesRecibidos++;
-                System.out.println("Imagen " + nFramesRecibidos);
-                respuesta = cliente.recibirTCP();
-            }
-            texto.setText("FIN. Recibio " + nFramesRecibidos + " frames de un total de " + nFramesTotal);
-            cliente.clientSocketTCP.close();
+            Runnable myRun;
+            myRun = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        respuesta = cliente.recibirTCP();
+                        texto.setText(respuesta);
+                        //la funcion comprobarRespuesta crea el socket udp y se le envia el puerto al servidor
+                        //tambien retorna el la cantidad de imagenes
+                        nFramesTotal = cliente.comprobarRespuesta(respuesta);
+                        nFramesRecibidos = 0;
+                        respuesta = cliente.recibirTCP();
+                        while (!respuesta.equals("FIN")) {
+                            //se agregan las imagenes a un arrayList que hace de "buffer"
+                            buffer.add(new ImageIcon((cliente.recibirVideo().getData())));                            
+                            System.out.println("Imagen " + nFramesRecibidos);
+                            //recibe respuesta del servidor para saber si termino de enviar imagenes
+                            respuesta = cliente.recibirTCP();
+                            nFramesRecibidos++;
+                            labelImg.setIcon(buffer.get(0));
+                            buffer.remove(0);
+                        }
+                        texto.setText("FIN. Recibio " + nFramesRecibidos + " frames de un total de " + nFramesTotal);
+                        //cliente.clientSocketTCP.close();                        
+                    } catch (IOException ex) {
+                        System.err.println(ex);
+                    }
+                }
+            };
+            Thread t = new Thread(myRun);
+            t.start();
         } catch (IOException ex) {
             System.err.println(ex);
+
         }
     }
 

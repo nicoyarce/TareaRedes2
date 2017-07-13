@@ -12,14 +12,13 @@ public class Cliente {
     DatagramPacket paquete;
     PrintWriter alServidor;
     BufferedReader entradaDelServidor;
-    InetAddress IPAddress;
-    byte[] receiveData = new byte[2048];
+    
+    
 
     public Cliente() {
         //fijar entrada por teclado
         entradaDelUsuario = new BufferedReader(new InputStreamReader(System.in));
-        try {
-            //enviar datos al servidor
+        try {            
             clientSocketTCP = new Socket("127.0.0.1", 7777);
             //enviar datos al servidor
             alServidor = new PrintWriter(clientSocketTCP.getOutputStream(), true);
@@ -27,12 +26,7 @@ public class Cliente {
             entradaDelServidor = new BufferedReader(new InputStreamReader(clientSocketTCP.getInputStream()));
         } catch (IOException ex) {
             System.err.println(ex);
-        }        
-        try {
-            IPAddress = InetAddress.getByName("127.0.0.1");
-        } catch (UnknownHostException ex) {
-            System.err.println(ex);
-        }        
+        }       
     }
 
     public void enviarTCP(String texto) throws IOException {
@@ -52,6 +46,7 @@ public class Cliente {
         return port;
     }
     
+    //la funcion comprobarRespuesta crea el socket udp y se le envia el puerto al servidor
     public int comprobarRespuesta(String respuesta) throws IOException {
         int puerto = 0;
         if (respuesta.contains("OK")) {
@@ -64,6 +59,7 @@ public class Cliente {
     }
     
     public DatagramPacket recibirVideo() throws IOException{
+        byte[] receiveData = new byte[50000];
         paquete = new DatagramPacket(receiveData, receiveData.length);
         clientSocketUDP.receive(paquete);        
         return paquete;

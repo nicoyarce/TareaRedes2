@@ -2,21 +2,24 @@
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.*;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Vector;
-import javax.imageio.ImageIO;
+import javax.imageio.ImageIO;   
 
-public class ServidorMultiple extends Thread {
-
+public class ServidorMultiple extends Thread{
+    /*EDITAR ESTO!!!
+    Poner carpetas con imagenes*////////////
+    String RUTA1 = "D:\\Video1\\";
+    String RUTA2 = "D:\\Video2\\";
+    
     public Vector<BufferedReader> readers;
-    public Vector<Socket> clientes;
-    public Socket connectionSocket;
+    public Vector<Socket> clientes;    
     public Vector<PrintWriter> writers;
+    public Socket connectionSocket;
     private boolean ready;
 
-    DatagramSocket serverSocket;
+    public DatagramSocket serverSocket;
     public ArrayList<File> video1, video2;
 
     public ServidorMultiple() {
@@ -26,12 +29,13 @@ public class ServidorMultiple extends Thread {
         writers = new Vector<PrintWriter>();
         video1 = new ArrayList<File>();
         video2 = new ArrayList<File>();
-        //Abrir ruta con video1
-        File f = new File("C:\\Users\\Usuario\\Desktop\\Video1"); ///////////Editar esto
-        System.out.println("Video 1 tiene "+ (f.listFiles().length-1) +" fotos");
+        
+        File f = new File(RUTA1);
+        System.out.println("Video 1 tiene " + (f.listFiles().length) + " fotos");
         video1.addAll(Arrays.asList(f.listFiles()));
-        //f = new File("D:\\Video2");
-        //video2.addAll(Arrays.asList(f.listFiles()));
+        f = new File(RUTA2);
+        System.out.println("Video 2 tiene " + (f.listFiles().length) + " fotos");
+        video2.addAll(Arrays.asList(f.listFiles()));
     }
 
     public void add(Socket connectionSocket) throws IOException {
@@ -44,52 +48,51 @@ public class ServidorMultiple extends Thread {
         ready = true;
     }
 
-    public void run() {
-
-        String oracionCliente;
+    public void run() {        
         while (clientes != null) {
-
             for (int i = 0; i < clientes.size(); ++i) {
                 if (ready) // una variable para controlar concurrencia. Mejor usar locks si multiples hebras usan add(), lo que no es el caso
                 {
                     BufferedReader reader = readers.get(i);
                     PrintWriter writer = writers.get(i);
-
+                    byte[] img;
+                    String oracionCliente;
                     try {
                         if (reader.ready()) // revisa si hay datos nuevos en el buffer de lectura del socket i-emo
-                        {
+                        {                            
                             oracionCliente = reader.readLine(); //recibe el GET video
                             int video = comprobarPeticion(oracionCliente, writer);  //retorna el numero video elegido
                             System.out.println("Datos recibidos:" + oracionCliente + " desde " + clientes.get(i).getInetAddress().getHostAddress());
                             oracionCliente = reader.readLine(); //recibe el PORT mas el numero
                             System.out.println("Datos recibidos:" + oracionCliente + " desde " + clientes.get(i).getInetAddress().getHostAddress());
-                            
-                            serverSocket = new DatagramSocket();
+
                             String ipCliente = clientes.get(i).getInetAddress().getHostAddress(); //guarda la ip del cliente en un string
-                            int puertoUDPCliente = Integer.parseInt(oracionCliente.substring(5)); //guarda el puerto UDP para transmitir                             
+                            int puertoUDPCliente = Integer.parseInt(oracionCliente.substring(5)); //guarda el puerto UDP para transmitir                              
                             InetAddress IPCliente = InetAddress.getByName(ipCliente); //declara la ip en un objeto InetAdress
+                            serverSocket = new DatagramSocket(); //crea socket UDP
                             switch (video) {    //revisa opcion de video
                                 case 1:
                                     for (int j = 0; j < video1.size(); j++) {
-                                        byte[] img = transformarImagen(video1.get(j));
+                                        img = transformarImagen(video1.get(j));
                                         DatagramPacket packet = new DatagramPacket(img, img.length, IPCliente, puertoUDPCliente);
                                         writer.println("NOFIN"); //se envia este mensaje para indicar al cliente que quedan imagenes
-                                        serverSocket.send(packet);
+                                        serverSocket.send(packet);                                        
+                                        Thread.sleep(100);                                        
                                     }
                                 case 2:
                                     for (int j = 0; j < video2.size(); j++) {
-                                        byte[] img = transformarImagen(video2.get(j));
+                                        img = transformarImagen(video2.get(j));
                                         DatagramPacket packet = new DatagramPacket(img, img.length, IPCliente, puertoUDPCliente);
                                         writer.println("NOFIN"); //se envia este mensaje para indicar al cliente que quedan imagenes
                                         serverSocket.send(packet);
+                                        Thread.sleep(250);
                                     }
                             }
                             writer.println("FIN");
                             writer.flush();
                         }
-                    } catch (IOException e) {
-                        // TODO Auto-generated catch block
-                        System.err.println(e);
+                    } catch (IOException | InterruptedException ex) {
+                        System.err.println(ex);
                     }
                 } //if
             }//for
@@ -111,8 +114,9 @@ public class ServidorMultiple extends Thread {
         }
         welcomeSocket.close();
     }
+
     /*esta funcion comprueba el GET video y envia el OK con el tamaño*/
-    private int comprobarPeticion(String oracionCliente, PrintWriter writer) {        
+    private int comprobarPeticion(String oracionCliente, PrintWriter writer) {
         if (oracionCliente.contains("GET video")) {
             String nVideo = oracionCliente.substring(10); //corta el final del string
             switch (Integer.parseInt(nVideo)) {
@@ -129,7 +133,11 @@ public class ServidorMultiple extends Thread {
     }
 
     private byte[] transformarImagen(File foto) throws IOException {
-        byte[] buffer = Files.readAllBytes(foto.toPath());
+        BufferedImage img = ImageIO.read(foto);
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(img, "jpg", baos);
+        baos.flush();
+        byte[] buffer = baos.toByteArray();
         return buffer;
     }
 }
