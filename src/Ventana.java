@@ -3,14 +3,13 @@ import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class Ventana implements ActionListener {
@@ -49,11 +48,6 @@ public class Ventana implements ActionListener {
         panelCentro.add(labelImg);
         boton1.addActionListener(this);
         boton2.addActionListener(this);
-        try {
-            labelImg.setIcon(new ImageIcon(ImageIO.read(new File("D:\\Video1\\Video1 0030.jpg"))));
-        } catch (IOException ex) {
-            System.err.println(ex);
-        }
     }
 
     private void configurarVentana() {
@@ -70,9 +64,13 @@ public class Ventana implements ActionListener {
         try {
             if (e.getSource() == boton1) {
                 cliente.enviarTCP("GET video_1");
+                boton1.setEnabled(false);
+                boton2.setEnabled(false);
             }
             if (e.getSource() == boton2) {
                 cliente.enviarTCP("GET video_2");
+                boton1.setEnabled(false);
+                boton2.setEnabled(false);
             }
             Runnable myRun;
             myRun = new Runnable() {
@@ -88,7 +86,7 @@ public class Ventana implements ActionListener {
                         respuesta = cliente.recibirTCP();
                         while (!respuesta.equals("FIN")) {
                             //se agregan las imagenes a un arrayList que hace de "buffer"
-                            buffer.add(new ImageIcon((cliente.recibirVideo().getData())));                            
+                            buffer.add(new ImageIcon((cliente.recibirVideo().getData())));
                             System.out.println("Imagen " + nFramesRecibidos);
                             //recibe respuesta del servidor para saber si termino de enviar imagenes
                             respuesta = cliente.recibirTCP();
@@ -96,18 +94,17 @@ public class Ventana implements ActionListener {
                             labelImg.setIcon(buffer.get(0));
                             buffer.remove(0);
                         }
-                        texto.setText("FIN. Recibio " + nFramesRecibidos + " frames de un total de " + nFramesTotal);
+                        texto.setText("FIN. Recibio " + nFramesRecibidos + " frames de un total de " + nFramesTotal);                        
                         //cliente.clientSocketTCP.close();                        
                     } catch (IOException ex) {
-                        System.err.println(ex);
+                        JOptionPane.showMessageDialog(marco, ex, "Error", 1);
                     }
                 }
             };
             Thread t = new Thread(myRun);
             t.start();
         } catch (IOException ex) {
-            System.err.println(ex);
-
+            JOptionPane.showMessageDialog(marco, ex, "Error", 1);
         }
     }
 
