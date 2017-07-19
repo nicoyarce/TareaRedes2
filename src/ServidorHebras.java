@@ -13,7 +13,7 @@ class ServidorHebras extends Thread {
     /*EDITAR ESTO!!!
     Poner carpetas con imagenes*////////////
     //Revisar main para ver si se agregan los archivos al arrayList
-    public static final String RUTA1 = "D:\\Video1\\";
+    public static final String RUTA1 = "/home/nicoyarce/Desktop/Video1";
     public static final String RUTA2 = "D:\\Video2\\";
     public static ArrayList<File> video1, video2;
     public BufferedReader reader;
@@ -75,14 +75,22 @@ class ServidorHebras extends Thread {
     }
 
     public static void main(String argv[]) throws Exception {
-        ServerSocket welcomeSocket = new ServerSocket(7777);
+        ServerSocket welcomeSocket = new ServerSocket(7778);
 
         video1 = new ArrayList<>();
         video2 = new ArrayList<>();
-        File directorio1 = new File(RUTA1);
-        video1.addAll(Arrays.asList(directorio1.listFiles()));
+        File[] fileList;
+        //codigo para ordenar y agregar imagenes en arrayList
+        File directorio1 = new File(RUTA1);        
+        fileList = directorio1.listFiles();
+        Arrays.sort(fileList);
+        video1.addAll(Arrays.asList(fileList));
+        /*
         File directorio2 = new File(RUTA2);
-        video2.addAll(Arrays.asList(directorio2.listFiles()));
+        fileList = directorio2.listFiles();
+        Arrays.sort(fileList);
+        video2.addAll(Arrays.asList(fileList));*/
+        
         while (true) {
             Socket connectionSocket = welcomeSocket.accept();
             // crear hebra para nuevo cliente

@@ -17,7 +17,7 @@ public class Cliente {
         //fijar entrada por teclado
         entradaDelUsuario = new BufferedReader(new InputStreamReader(System.in));
         try {
-            clientSocketTCP = new Socket("127.0.0.1", 7777);
+            clientSocketTCP = new Socket("127.0.0.1", 7778);
             //enviar datos al servidor
             alServidor = new PrintWriter(clientSocketTCP.getOutputStream(), true);
             //recibir datos desde el servidor
